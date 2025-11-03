@@ -43,5 +43,6 @@ public class Testing : MonoBehaviour
                 Debug.Log("SpriteRenderer tidak ada");
             }
         }
+        // Cek perubahan disini guys lesgoo
     }
 }
