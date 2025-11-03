@@ -43,17 +43,5 @@ public class Testing : MonoBehaviour
                 Debug.Log("SpriteRenderer tidak ada");
             }
         }
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    Debug.Log("Space key was pressed.");
-        //    if (spRenderer != null)
-        //    {
-        //        spRenderer.color = Color.blue;
-        //    }
-        //    else
-        //    {
-        //        Debug.Log("SpriteRenderer tidak ada");
-        //    }
-        //}
     }
 }
