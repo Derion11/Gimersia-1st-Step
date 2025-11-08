@@ -36,7 +36,7 @@ public class Testing : MonoBehaviour
             Debug.Log("Space key was pressed.");
             if (spRenderer != null)
             {
-                spRenderer.color = Color.green;
+                spRenderer.color = Color.yellow;
             }
             else
             {
