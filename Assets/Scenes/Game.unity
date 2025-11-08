@@ -151,8 +151,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eafab0cdf28a314a93e579f3aa89790, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baris: 15
-  kolom: 15
+  baris: 10
+  kolom: 10
   ukuranKotak: 1
   origin: {x: 0, y: 0, z: 0}
   prefabKotak: {fileID: 2726822350262933664, guid: 4e52cd51bc2b2a948b27e27df49791bc, type: 3}
