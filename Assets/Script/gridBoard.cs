@@ -17,8 +17,9 @@ public class gridBoard : MonoBehaviour
     private List<GameObject> daftarKotak = new List<GameObject>(); // penyimpanan objek kotak di scene
     public List<Vector3> posisiKotak = new List<Vector3>();        // penyimpanan posisi tiap kotak (array posisi)
 
-    public Pawn pawn01;
+    public bool SedangGerak;
 
+    public Pawn pawn01;
 
     void Start()
     {
@@ -116,7 +117,7 @@ public class gridBoard : MonoBehaviour
     /// </summary>
     public Vector3 GetPosisiKotak(int nomor)
     {
-        nomor = Mathf.Clamp(nomor, 0, posisiKotak.Count);
+        nomor = Mathf.Clamp(nomor, 0, posisiKotak.Count - 1);
         return posisiKotak[nomor];
     }
 }
