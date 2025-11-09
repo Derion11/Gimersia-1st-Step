@@ -4,8 +4,8 @@ using UnityEngine;
 public class gridBoard : MonoBehaviour
 {
     [Header("Ukuran papan")]
-    public int baris = 15;  // jumlah baris (misal 10)
-    public int kolom = 15;   // jumlah kolom (misal 10)
+    public int baris = 10;  // jumlah baris (misal 10)
+    public int kolom = 10;   // jumlah kolom (misal 10)
 
     [Header("Layout posisi kotak")]
     public float ukuranKotak = 1f;          // jarak antar kotak
@@ -17,11 +17,18 @@ public class gridBoard : MonoBehaviour
     private List<GameObject> daftarKotak = new List<GameObject>(); // penyimpanan objek kotak di scene
     public List<Vector3> posisiKotak = new List<Vector3>();        // penyimpanan posisi tiap kotak (array posisi)
 
+    public Pawn pawn01;
+
 
     void Start()
     {
         BuatGrid();
         GambarGrid();
+
+        if (pawn01 != null)
+        {
+            pawn01.StartGame();
+        }
     }
 
     /// <summary>
