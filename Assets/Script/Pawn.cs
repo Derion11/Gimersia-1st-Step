@@ -30,16 +30,6 @@ public class Pawn : MonoBehaviour
         SnapKeKotak();
     }
 
-    void Update()
-    {
-        // contoh kontrol sederhana: tekan Spasi untuk maju 1 langkah
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            LemparDaduDanJalan();
-            // JalanSatuLangkah();
-        }
-    }
-
     /// <summary>
     /// Maju satu kotak (kalau belum sampai kotak terakhir).
     /// </summary>
@@ -59,19 +49,6 @@ public class Pawn : MonoBehaviour
 
         nomorSaatIni = target;
         SnapKeKotak();
-    }
-
-    /// <summary>
-    /// Pindahkan bidak langsung ke nomor kotak saat ini.
-    /// </summary>
-    public void SnapKeKotak()
-    {
-        if (papan == null) return;
-
-        Vector3 pos = papan.GetPosisiKotak(nomorSaatIni);
-
-        transform.position = pos;
-        transform.SetParent(papan.transform); // rapikan hierarchy
     }
 
     /// <summary>
@@ -111,20 +88,43 @@ public class Pawn : MonoBehaviour
         papan.SedangGerak = true;
 
         // Melangkah dari (nomorSaatIni+1) sampai targetNomor
-        while (nomorSaatIni < targetNomor)
         {
-            int berikutnya = nomorSaatIni + 1;
-            Vector3 start = transform.position;
-            Vector3 tujuan = papan.GetPosisiKotak(berikutnya);
+            while (nomorSaatIni < targetNomor) {
+                int berikutnya = nomorSaatIni + 1;
+                Vector3 start = transform.position;
+                Vector3 tujuan = papan.GetPosisiKotak(berikutnya);
 
-            // tanpa animasi, tapi tetap satu-per-satu
-            transform.position = tujuan;
-            // beri 1 frame jeda biar terlihat “bertahap”
-            yield return null;
+                // tanpa animasi, tapi tetap satu-per-satu
+                transform.position = tujuan;
+                // beri 1 frame jeda biar terlihat “bertahap”
+                yield return null;
 
-            nomorSaatIni = berikutnya;
+                nomorSaatIni = berikutnya;
+            }
         }
 
         papan.SedangGerak = false;
+        
+        if (papan.giliranPlayer == 0)
+        {
+            papan.giliranPlayer = 1;
+        }
+        else
+        {
+            papan.giliranPlayer = 0;
+        }
+    }
+    /// <summary>
+    /// Pindahkan bidak langsung ke nomor kotak saat ini.
+    /// </summary>
+
+    public void SnapKeKotak()
+    {
+        if (papan == null) return;
+
+        Vector3 pos = papan.GetPosisiKotak(nomorSaatIni);
+
+        transform.position = pos;
+        transform.SetParent(papan.transform); // rapikan hierarchy
     }
 }

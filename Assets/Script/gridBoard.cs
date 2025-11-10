@@ -17,18 +17,41 @@ public class gridBoard : MonoBehaviour
     private List<GameObject> daftarKotak = new List<GameObject>(); // penyimpanan objek kotak di scene
     public List<Vector3> posisiKotak = new List<Vector3>();        // penyimpanan posisi tiap kotak (array posisi)
 
-    public bool SedangGerak;
+    [Header("Referensi Pemain")]
+    public Pawn player01;
+    public Pawn player02;
 
-    public Pawn pawn01;
+    public bool SedangGerak;
+    public int giliranPlayer;
 
     void Start()
     {
         BuatGrid();
         GambarGrid();
-
-        if (pawn01 != null)
+        if (player01 != null && player02 != null)
         {
-            pawn01.StartGame();
+            player01.SnapKeKotak();
+            player02.SnapKeKotak();
+        }
+    }
+
+    void Update()
+    {
+        // contoh kontrol sederhana: tekan Spasi untuk maju 1 langkah
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (player01 != null && player02 != null)
+            {
+                if (giliranPlayer == 0)
+                    {
+                    player01.LemparDaduDanJalan();
+                    }
+                else
+                    {
+                    player02.LemparDaduDanJalan();
+                    }  
+            }
+            // JalanSatuLangkah();
         }
     }
 
@@ -60,7 +83,6 @@ public class gridBoard : MonoBehaviour
                 }
             }
         }
-
     }
 
     /// <summary>
@@ -76,7 +98,7 @@ public class gridBoard : MonoBehaviour
                 Destroy(kotak);
             } 
         }
-            
+
         daftarKotak.Clear();
 
         // Buat kotak baru di setiap posisi
@@ -92,22 +114,6 @@ public class gridBoard : MonoBehaviour
             
             // Tambahkan gradient warna
             float t = (float)i / (posisiKotak.Count - 1); // nilai 0 sampai 1
-            Color gradientColor = Color.Lerp(Color.blue, Color.red, t); // gradient dari biru ke merah
-            // Set warna ke SpriteRenderer atau MeshRenderer
-            SpriteRenderer spriteRenderer = kotakBaru.GetComponent<SpriteRenderer>();
-            if (spriteRenderer != null)
-            {
-                spriteRenderer.color = gradientColor;
-            }
-            else
-            {
-                MeshRenderer meshRenderer = kotakBaru.GetComponent<MeshRenderer>();
-                if (meshRenderer != null)
-                {
-                    meshRenderer.material.color = gradientColor;
-                }
-            }
-            
             daftarKotak.Add(kotakBaru);
         }
     }
