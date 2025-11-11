@@ -60,7 +60,7 @@ public class Pawn : MonoBehaviour
 
         // angka acak antara 1 sampai 6 (inklusif)
         int langkah = Random.Range(1, 7);
-
+        
         Debug.Log( "Hasil dadu: " + langkah);
 
         // panggil fungsi jalan
