@@ -756,7 +756,7 @@ MonoBehaviour:
   bgmClips:
   - {fileID: 8300000, guid: 6dd11f87785effc42b6a12d1e7030e5f, type: 3}
   sfxClips:
-  - {fileID: 8300000, guid: 7d5f1ea97c5acc042aea899e3a5760ee, type: 3}
+  - {fileID: 8300000, guid: 2c21ebadac5069b44812f80f46c2c85e, type: 3}
 --- !u!1 &1977200091
 GameObject:
   m_ObjectHideFlags: 0
