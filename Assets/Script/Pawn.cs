@@ -9,6 +9,16 @@ public class Pawn : MonoBehaviour
     [Header("Posisi awal (0 = kotak pertama)")]
     public int nomorSaatIni = 0;
 
+    [Header("Movement Animation Settings")]
+    [Tooltip("Time per step in seconds (lower = faster)")]
+    public float stepDuration = 0.15f;
+    
+    [Tooltip("How high the pawn jumps during movement")]
+    public float hopHeight = 0.3f;
+    
+    [Tooltip("Use smooth easing (more natural) vs linear movement")]
+    public bool useSmoothEasing = true;
+
     public void StartGame()
     {
         // pastikan ada papan
@@ -53,18 +63,39 @@ public class Pawn : MonoBehaviour
 
     /// <summary>
     /// Lempar dadu 1–6, lalu jalan sesuai hasilnya.
+    /// NEW: Plays dice animation first, then moves the pawn.
     /// </summary>
     public void LemparDaduDanJalan()
     {
         if (papan == null || papan.SedangGerak) return;
 
-        // angka acak antara 1 sampai 6 (inklusif)
+        // Generate random dice value
         int langkah = Random.Range(1, 7);
         
-        Debug.Log( "Hasil dadu: " + langkah);
+        Debug.Log("Hasil dadu: " + langkah);
 
-        // panggil fungsi jalan
-        JalanBeberapaLangkah(langkah);
+        // Check if dice animator is available
+        if (papan.diceAnimator != null)
+        {
+            Debug.Log("Pawn: Dice animator found! Starting animation...");
+            
+            // Lock game during dice animation
+            papan.SedangGerak = true;
+
+            // Play dice animation, then move when done
+            papan.diceAnimator.RollDice(langkah, () => {
+                Debug.Log("Pawn: Dice animation callback received! Starting movement...");
+                // This callback runs after animation finishes
+                papan.SedangGerak = false;
+                JalanBeberapaLangkah(langkah);
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Pawn: No dice animator assigned! Moving immediately...");
+            // No animator, move immediately (fallback)
+            JalanBeberapaLangkah(langkah);
+        }
     }
 
     /// <summary>
@@ -97,18 +128,48 @@ public class Pawn : MonoBehaviour
             int direction = targetIndex > nomorSaatIni ? 1 : -1;
             int berikutnya = nomorSaatIni + direction;
             
-            Vector3 tujuan = papan.GetPosisiKotak(berikutnya);
+            Vector3 startPos = transform.position;
+            Vector3 endPos = papan.GetPosisiKotak(berikutnya);
 
-            // Move to next position
-            transform.position = tujuan;
+            // Smooth animation with hop/arc effect
+            float elapsed = 0f;
+            while (elapsed < stepDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / stepDuration;
 
+                // Apply easing based on setting
+                float interpolatedT = useSmoothEasing ? Mathf.SmoothStep(0f, 1f, t) : t;
+
+                // Linear horizontal movement
+                Vector3 horizontalPos = Vector3.Lerp(startPos, endPos, interpolatedT);
+
+                // Add vertical hop (parabolic arc)
+                float hopOffset = hopHeight * Mathf.Sin(t * Mathf.PI);
+                
+                // Apply position with hop
+                if (papan.layout2D_XY)
+                {
+                    // 2D mode: hop along Z-axis (or Y if you prefer)
+                    transform.position = horizontalPos + new Vector3(0, hopOffset, 0);
+                }
+                else
+                {
+                    // 3D mode: hop along Y-axis
+                    transform.position = horizontalPos + new Vector3(0, hopOffset, 0);
+                }
+
+                yield return null;
+            }
+
+            // Snap to exact position
+            transform.position = endPos;
+
+            // Play step sound
             if (AudioManaging.Instance != null)
             {
                 AudioManaging.Instance.PlaySFX("step");
             }
-
-            // Wait before next step
-            yield return new WaitForSeconds(0.5f);
 
             nomorSaatIni = berikutnya;
         }

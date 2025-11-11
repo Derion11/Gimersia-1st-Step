@@ -39,6 +39,9 @@ public class gridBoard : MonoBehaviour
     [Header("Random Card System")]
     public RandomCardManager cardManager;
 
+    [Header("Dice Animation")]
+    public DiceAnimator diceAnimator;
+
     public bool SedangGerak;
     public int giliranPlayer;
     public int LastIndex => posisiKotak.Count - 1;
