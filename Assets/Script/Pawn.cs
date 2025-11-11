@@ -86,18 +86,27 @@ public class Pawn : MonoBehaviour
     {
         papan.SedangGerak = true;
 
+        // ...
         while (nomorSaatIni < targetIndex)
         {
             int berikutnya = nomorSaatIni + 1;
-
             Vector3 start = transform.position;
             Vector3 tujuan = papan.GetPosisiKotak(berikutnya);
 
+            // tanpa animasi, tapi tetap satu-per-satu
             transform.position = tujuan;
-            yield return null; // beri jeda 1 frame agar terasa bertahap
+
+            if (AudioManaging.Instance != null)
+            {
+                AudioManaging.Instance.PlaySFX("step");
+            }
+
+            // Tunggu 0.1 detik sebelum pindah ke kotak berikutnya
+            yield return new WaitForSeconds(0.5f);
 
             nomorSaatIni = berikutnya;
-        }
+            }
+        
 
         // === Cek ular & tangga setelah berhenti (0-based) ===
         int sebelum = nomorSaatIni;
