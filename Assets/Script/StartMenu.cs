@@ -24,7 +24,7 @@ public class StartMenu : MonoBehaviour
         }
 
         // Kode Anda yang sudah ada
-        SceneManager.LoadScene(1); // Ganti jika perlu
+        SceneManager.LoadScene("Game"); // Ganti jika perlu
     }
 
     public void QuitGame()
