@@ -36,6 +36,9 @@ public class gridBoard : MonoBehaviour
     private readonly List<LineRenderer> _garisUlar = new List<LineRenderer>();
     private readonly List<LineRenderer> _garisTangga = new List<LineRenderer>();
 
+    [Header("Random Card System")]
+    public RandomCardManager cardManager;
+
     public bool SedangGerak;
     public int giliranPlayer;
     public int LastIndex => posisiKotak.Count - 1;
@@ -47,6 +50,13 @@ public class gridBoard : MonoBehaviour
         GambarGrid();
         BangunPetaUlarTangga();
         GambarGarisUlarTangga();
+        
+        // Spawn random cards after board is ready
+        if (cardManager != null)
+        {
+            cardManager.SpawnRandomCards();
+        }
+        
         if (player01 != null && player02 != null)
         {
             player01.SnapKeKotak();

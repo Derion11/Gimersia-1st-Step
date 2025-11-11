@@ -68,32 +68,38 @@ public class Pawn : MonoBehaviour
     }
 
     /// <summary>
-    /// Jalan maju beberapa langkah, melewati setiap grid satu-per-satu.
+    /// Jalan maju/mundur 'jumlahLangkah' kotak, satu-per-satu, 0-based.
+    /// Positive = forward, Negative = backward
     /// </summary>
-/// <summary>Jalan maju 'jumlahLangkah' kotak, satu-per-satu, 0-based.</summary>
-    public void JalanBeberapaLangkah(int jumlahLangkah)
+    public void JalanBeberapaLangkah(int jumlahLangkah, bool fromCard = false)
     {
-        if (papan == null || papan.SedangGerak || jumlahLangkah <= 0) return;
+        if (papan == null || papan.SedangGerak || jumlahLangkah == 0) return;
 
-        int targetIndex = Mathf.Min(nomorSaatIni + jumlahLangkah, papan.LastIndex);
-        StartCoroutine(GerakStepByStep(targetIndex));
+        int targetIndex = nomorSaatIni + jumlahLangkah;
+        
+        // Clamp to valid range [0, LastIndex]
+        targetIndex = Mathf.Clamp(targetIndex, 0, papan.LastIndex);
+        
+        StartCoroutine(GerakStepByStep(targetIndex, fromCard));
     }
 
     /// <summary>
-    /// Korutin: melangkah satu kotak demi satu kotak sampai targetNomor.
+    /// Korutin: melangkah satu kotak demi satu kotak sampai targetIndex (forward or backward).
     /// </summary>
-    private IEnumerator GerakStepByStep(int targetIndex)
+    private IEnumerator GerakStepByStep(int targetIndex, bool fromCard = false)
     {
         papan.SedangGerak = true;
 
-        // ...
-        while (nomorSaatIni < targetIndex)
+        // Handle both forward and backward movement
+        while (nomorSaatIni != targetIndex)
         {
-            int berikutnya = nomorSaatIni + 1;
-            Vector3 start = transform.position;
+            // Determine direction: +1 for forward, -1 for backward
+            int direction = targetIndex > nomorSaatIni ? 1 : -1;
+            int berikutnya = nomorSaatIni + direction;
+            
             Vector3 tujuan = papan.GetPosisiKotak(berikutnya);
 
-            // tanpa animasi, tapi tetap satu-per-satu
+            // Move to next position
             transform.position = tujuan;
 
             if (AudioManaging.Instance != null)
@@ -101,11 +107,11 @@ public class Pawn : MonoBehaviour
                 AudioManaging.Instance.PlaySFX("step");
             }
 
-            // Tunggu 0.1 detik sebelum pindah ke kotak berikutnya
+            // Wait before next step
             yield return new WaitForSeconds(0.5f);
 
             nomorSaatIni = berikutnya;
-            }
+        }
         
 
         // === Cek ular & tangga setelah berhenti (0-based) ===
@@ -127,6 +133,18 @@ public class Pawn : MonoBehaviour
             }
 
             nomorSaatIni = sesudah;
+        }
+
+        // === NEW: Cek random card setelah ular & tangga (but not if this movement was from a card) ===
+        if (!fromCard && papan.cardManager != null)
+        {
+            RandomCard card = papan.cardManager.GetCardAtPosition(nomorSaatIni);
+            if (card != null)
+            {
+                papan.SedangGerak = true;  // Keep game paused
+                papan.cardManager.OnCardActivated(this, card);
+                yield break;  // Stop here, UI will handle the rest
+            }
         }
 
         papan.SedangGerak = false;
