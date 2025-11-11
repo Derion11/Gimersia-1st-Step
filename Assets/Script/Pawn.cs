@@ -70,41 +70,58 @@ public class Pawn : MonoBehaviour
     /// <summary>
     /// Jalan maju beberapa langkah, melewati setiap grid satu-per-satu.
     /// </summary>
+/// <summary>Jalan maju 'jumlahLangkah' kotak, satu-per-satu, 0-based.</summary>
     public void JalanBeberapaLangkah(int jumlahLangkah)
     {
-        if (papan == null || jumlahLangkah <= 0 || papan.SedangGerak) return;
+        if (papan == null || papan.SedangGerak || jumlahLangkah <= 0) return;
 
-        int totalKotak = papan.posisiKotak.Count;
-        int target = Mathf.Min(nomorSaatIni + jumlahLangkah, totalKotak);
-
-        StartCoroutine(GerakStepByStep(target));
+        int targetIndex = Mathf.Min(nomorSaatIni + jumlahLangkah, papan.LastIndex);
+        StartCoroutine(GerakStepByStep(targetIndex));
     }
 
     /// <summary>
     /// Korutin: melangkah satu kotak demi satu kotak sampai targetNomor.
     /// </summary>
-    private IEnumerator GerakStepByStep(int targetNomor)
+    private IEnumerator GerakStepByStep(int targetIndex)
     {
         papan.SedangGerak = true;
 
-        // Melangkah dari (nomorSaatIni+1) sampai targetNomor
+        while (nomorSaatIni < targetIndex)
         {
-            while (nomorSaatIni < targetNomor) {
-                int berikutnya = nomorSaatIni + 1;
-                Vector3 start = transform.position;
-                Vector3 tujuan = papan.GetPosisiKotak(berikutnya);
+            int berikutnya = nomorSaatIni + 1;
 
-                // tanpa animasi, tapi tetap satu-per-satu
-                transform.position = tujuan;
-                // beri 1 frame jeda biar terlihat “bertahap”
+            Vector3 start = transform.position;
+            Vector3 tujuan = papan.GetPosisiKotak(berikutnya);
+
+            transform.position = tujuan;
+            yield return null; // beri jeda 1 frame agar terasa bertahap
+
+            nomorSaatIni = berikutnya;
+        }
+
+        // === Cek ular & tangga setelah berhenti (0-based) ===
+        int sebelum = nomorSaatIni;
+        int sesudah = papan.ApplyUlarTangga(sebelum);
+
+        if (sesudah != sebelum)
+        {
+            Vector3 dari = transform.position;
+            Vector3 ke = papan.GetPosisiKotak(sesudah);
+
+            float t2 = 0f;
+            float dur2 = 0.25f; // animasi singkat meluncur
+            while (t2 < 1f)
+            {
+                t2 += Time.deltaTime / dur2;
+                transform.position = Vector3.Lerp(dari, ke, t2);
                 yield return null;
-
-                nomorSaatIni = berikutnya;
             }
+
+            nomorSaatIni = sesudah;
         }
 
         papan.SedangGerak = false;
-        
+
         if (papan.giliranPlayer == 0)
         {
             papan.giliranPlayer = 1;
@@ -114,6 +131,7 @@ public class Pawn : MonoBehaviour
             papan.giliranPlayer = 0;
         }
     }
+
     /// <summary>
     /// Pindahkan bidak langsung ke nomor kotak saat ini.
     /// </summary>
