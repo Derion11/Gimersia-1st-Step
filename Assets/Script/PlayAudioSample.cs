@@ -8,16 +8,16 @@ public class PlayAudioSample : MonoBehaviour
 
     public void PlayBGMAudio()
     {
-        AudioManager.Instance.PlayBGM(_bgmAudioName.text);
+        AudioManaging.Instance.PlayBGM(_bgmAudioName.text);
     }
 
     public void StopBGMAudio()
     {
-        AudioManager.Instance.StopBGM();
+        AudioManaging.Instance.StopBGM();
     }
 
     public void PlaySFXAudio()
     {
-        AudioManager.Instance.PlaySFX(_sfxAudioName.text);
+        AudioManaging.Instance.PlaySFX(_sfxAudioName.text);
     }
 }

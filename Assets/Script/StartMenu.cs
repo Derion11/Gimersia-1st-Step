@@ -6,9 +6,9 @@ public class StartMenu : MonoBehaviour
     void Start()
     {
         // Panggil BGM menggunakan NAMA FILENYA
-        if (AudioManager.Instance != null)
+        if (AudioManaging.Instance != null)
         {
-            AudioManager.Instance.PlayBGM("main_menu_theme");
+            AudioManaging.Instance.PlayBGM("main_menu_theme");
             // ^ Ganti "MainTheme" jika Anda menggunakan "CasualTheme"
         }
     }
@@ -17,10 +17,10 @@ public class StartMenu : MonoBehaviour
     public void StartGame()
     {
         // Panggil SFX menggunakan NAMA FILENYA
-        if (AudioManager.Instance != null)
+        if (AudioManaging.Instance != null)
         {
-            AudioManager.Instance.PlaySFX("button_push");
-            AudioManager.Instance.StopBGM();
+            AudioManaging.Instance.PlaySFX("button_push");
+            AudioManaging.Instance.StopBGM();
         }
 
         // Kode Anda yang sudah ada
