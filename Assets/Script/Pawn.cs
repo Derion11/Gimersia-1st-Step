@@ -9,6 +9,16 @@ public class Pawn : MonoBehaviour
     [Header("Posisi awal (0 = kotak pertama)")]
     public int nomorSaatIni = 0;
 
+    [Header("Movement Animation Settings")]
+    [Tooltip("Time per step in seconds (lower = faster)")]
+    public float stepDuration = 0.15f;
+    
+    [Tooltip("How high the pawn jumps during movement")]
+    public float hopHeight = 0.3f;
+    
+    [Tooltip("Use smooth easing (more natural) vs linear movement")]
+    public bool useSmoothEasing = true;
+
     public void StartGame()
     {
         // pastikan ada papan
@@ -53,59 +63,116 @@ public class Pawn : MonoBehaviour
 
     /// <summary>
     /// Lempar dadu 1–6, lalu jalan sesuai hasilnya.
+    /// NEW: Plays dice animation first, then moves the pawn.
     /// </summary>
     public void LemparDaduDanJalan()
     {
         if (papan == null || papan.SedangGerak) return;
 
-        // angka acak antara 1 sampai 6 (inklusif)
+        // Generate random dice value
         int langkah = Random.Range(1, 7);
         
-        Debug.Log( "Hasil dadu: " + langkah);
+        Debug.Log("Hasil dadu: " + langkah);
 
-        // panggil fungsi jalan
-        JalanBeberapaLangkah(langkah);
+        // Check if dice animator is available
+        if (papan.diceAnimator != null)
+        {
+            Debug.Log("Pawn: Dice animator found! Starting animation...");
+            
+            // Lock game during dice animation
+            papan.SedangGerak = true;
+
+            // Play dice animation, then move when done
+            papan.diceAnimator.RollDice(langkah, () => {
+                Debug.Log("Pawn: Dice animation callback received! Starting movement...");
+                // This callback runs after animation finishes
+                papan.SedangGerak = false;
+                JalanBeberapaLangkah(langkah);
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Pawn: No dice animator assigned! Moving immediately...");
+            // No animator, move immediately (fallback)
+            JalanBeberapaLangkah(langkah);
+        }
     }
 
     /// <summary>
-    /// Jalan maju beberapa langkah, melewati setiap grid satu-per-satu.
+    /// Jalan maju/mundur 'jumlahLangkah' kotak, satu-per-satu, 0-based.
+    /// Positive = forward, Negative = backward
     /// </summary>
-/// <summary>Jalan maju 'jumlahLangkah' kotak, satu-per-satu, 0-based.</summary>
-    public void JalanBeberapaLangkah(int jumlahLangkah)
+    public void JalanBeberapaLangkah(int jumlahLangkah, bool fromCard = false)
     {
-        if (papan == null || papan.SedangGerak || jumlahLangkah <= 0) return;
+        if (papan == null || papan.SedangGerak || jumlahLangkah == 0) return;
 
-        int targetIndex = Mathf.Min(nomorSaatIni + jumlahLangkah, papan.LastIndex);
-        StartCoroutine(GerakStepByStep(targetIndex));
+        int targetIndex = nomorSaatIni + jumlahLangkah;
+        
+        // Clamp to valid range [0, LastIndex]
+        targetIndex = Mathf.Clamp(targetIndex, 0, papan.LastIndex);
+        
+        StartCoroutine(GerakStepByStep(targetIndex, fromCard));
     }
 
     /// <summary>
-    /// Korutin: melangkah satu kotak demi satu kotak sampai targetNomor.
+    /// Korutin: melangkah satu kotak demi satu kotak sampai targetIndex (forward or backward).
     /// </summary>
-    private IEnumerator GerakStepByStep(int targetIndex)
+    private IEnumerator GerakStepByStep(int targetIndex, bool fromCard = false)
     {
         papan.SedangGerak = true;
 
-        // ...
-        while (nomorSaatIni < targetIndex)
+        // Handle both forward and backward movement
+        while (nomorSaatIni != targetIndex)
         {
-            int berikutnya = nomorSaatIni + 1;
-            Vector3 start = transform.position;
-            Vector3 tujuan = papan.GetPosisiKotak(berikutnya);
+            // Determine direction: +1 for forward, -1 for backward
+            int direction = targetIndex > nomorSaatIni ? 1 : -1;
+            int berikutnya = nomorSaatIni + direction;
+            
+            Vector3 startPos = transform.position;
+            Vector3 endPos = papan.GetPosisiKotak(berikutnya);
 
-            // tanpa animasi, tapi tetap satu-per-satu
-            transform.position = tujuan;
+            // Smooth animation with hop/arc effect
+            float elapsed = 0f;
+            while (elapsed < stepDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / stepDuration;
 
+                // Apply easing based on setting
+                float interpolatedT = useSmoothEasing ? Mathf.SmoothStep(0f, 1f, t) : t;
+
+                // Linear horizontal movement
+                Vector3 horizontalPos = Vector3.Lerp(startPos, endPos, interpolatedT);
+
+                // Add vertical hop (parabolic arc)
+                float hopOffset = hopHeight * Mathf.Sin(t * Mathf.PI);
+                
+                // Apply position with hop
+                if (papan.layout2D_XY)
+                {
+                    // 2D mode: hop along Z-axis (or Y if you prefer)
+                    transform.position = horizontalPos + new Vector3(0, hopOffset, 0);
+                }
+                else
+                {
+                    // 3D mode: hop along Y-axis
+                    transform.position = horizontalPos + new Vector3(0, hopOffset, 0);
+                }
+
+                yield return null;
+            }
+
+            // Snap to exact position
+            transform.position = endPos;
+
+            // Play step sound
             if (AudioManaging.Instance != null)
             {
                 AudioManaging.Instance.PlaySFX("step");
             }
 
-            // Tunggu 0.1 detik sebelum pindah ke kotak berikutnya
-            yield return new WaitForSeconds(0.5f);
-
             nomorSaatIni = berikutnya;
-            }
+        }
         
 
         // === Cek ular & tangga setelah berhenti (0-based) ===
@@ -127,6 +194,18 @@ public class Pawn : MonoBehaviour
             }
 
             nomorSaatIni = sesudah;
+        }
+
+        // === NEW: Cek random card setelah ular & tangga (but not if this movement was from a card) ===
+        if (!fromCard && papan.cardManager != null)
+        {
+            RandomCard card = papan.cardManager.GetCardAtPosition(nomorSaatIni);
+            if (card != null)
+            {
+                papan.SedangGerak = true;  // Keep game paused
+                papan.cardManager.OnCardActivated(this, card);
+                yield break;  // Stop here, UI will handle the rest
+            }
         }
 
         papan.SedangGerak = false;
