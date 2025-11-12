@@ -1443,7 +1443,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6926c58d57d173046a01445fd2bbc9f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numberOfCards: 50
+  numberOfCards: 15
   minSteps: 1
   maxSteps: 10
   cardVisualPrefab: {fileID: 53569946777429180, guid: e50b54f52c1dc1441acc1245608cda50, type: 3}
