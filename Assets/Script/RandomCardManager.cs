@@ -117,6 +117,12 @@ public class RandomCardManager : MonoBehaviour
                     sr.sortingOrder = 50; // Above tiles, below pawns
                 }
 
+                // Add floating animation (like Mario Bros coins!)
+                FloatingAnimation floater = visual.AddComponent<FloatingAnimation>();
+                floater.floatAmplitude = board.ukuranKotak * 0.15f; // Float 15% of tile size
+                floater.floatSpeed = 2f; // 2 cycles per second
+                floater.enableRotation = false; // Set to true if you want spinning cards
+
                 cardVisuals[gridPos] = visual;
             }
 
