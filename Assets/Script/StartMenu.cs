@@ -9,11 +9,21 @@ public class StartMenu : MonoBehaviour
         if (AudioManaging.Instance != null)
         {
             AudioManaging.Instance.PlayBGM("main_menu_theme");
-            // ^ Ganti "MainTheme" jika Anda menggunakan "CasualTheme"
         }
     }
 
     // 2. MODIFIKASI FUNGSI INI
+    public void StartTutorial()
+    {
+        // Panggil SFX menggunakan NAMA FILENYA
+        if (AudioManaging.Instance != null)
+        {
+            AudioManaging.Instance.PlaySFX("button_push");
+        }
+
+        // Kode Anda yang sudah ada
+        SceneManager.LoadScene("TutorialMenu"); // Ganti jika perlu
+    }
     public void StartGame()
     {
         // Panggil SFX menggunakan NAMA FILENYA
