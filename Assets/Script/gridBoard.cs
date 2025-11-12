@@ -42,6 +42,18 @@ public class gridBoard : MonoBehaviour
     [Header("Dice Animation")]
     public DiceAnimator diceAnimator;
 
+    [Header("Audio")]
+    [Tooltip("Nama file BGM untuk scene Game (dari AudioManaging)")]
+    public string gameBGMName = "game_scene_theme"; // Ganti "game_music" dengan nama BGM Anda
+
+    [Header("Pause Menu")]
+    [Tooltip("Panel UI untuk menu pause")]
+    public GameObject pauseMenuPanel;
+    [Tooltip("Panel UI untuk menggelapkan background")]
+    public GameObject darkOverlayPanel;
+
+    private bool isPaused = false;
+
     public bool SedangGerak;
     public int giliranPlayer;
     public int LastIndex => posisiKotak.Count - 1;
@@ -65,10 +77,40 @@ public class gridBoard : MonoBehaviour
             player01.SnapKeKotak();
             player02.SnapKeKotak();
         }
+        // 1. Sembunyikan menu pause saat game dimulai
+        isPaused = false;
+        if (pauseMenuPanel != null) pauseMenuPanel.SetActive(false);
+        if (darkOverlayPanel != null) darkOverlayPanel.SetActive(false);
+
+        // 2. Mainkan BGM untuk Game Scene
+        if (AudioManaging.Instance != null)
+        {
+            AudioManaging.Instance.PlayBGM(gameBGMName);
+        }
+
     }
 
     void Update()
     {
+        // Cek input untuk pause/resume
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (isPaused)
+            {
+                ResumeGame();
+            }
+            else
+            {
+                PauseGame();
+            }
+        }
+
+        // Jika game sedang di-pause, jangan proses input lain (spasi)
+        if (isPaused)
+        {
+            return;
+        }
+
         // contoh kontrol sederhana: tekan Spasi untuk maju 1 langkah
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -324,4 +366,49 @@ public class gridBoard : MonoBehaviour
             _garisUlar.Add(lr);
         }
     }
-}
+    // --- TAMBAHKAN SEMUA FUNGSI DI BAWAH INI ---
+
+    /// <summary>
+    /// Mengaktifkan menu pause dan menghentikan game.
+    /// </summary>
+    public void PauseGame()
+    {
+        isPaused = true;
+        Time.timeScale = 0f; // Trik standar Unity untuk mem-pause semua aksi berbasis Time.deltaTime
+
+        if (pauseMenuPanel != null) pauseMenuPanel.SetActive(true);
+        if (darkOverlayPanel != null) darkOverlayPanel.SetActive(true);
+    }
+
+    /// <summary>
+    /// Menonaktifkan menu pause dan melanjutkan game.
+    /// </summary>
+    public void ResumeGame()
+    {
+        isPaused = false;
+        Time.timeScale = 1f; // Mengembalikan waktu ke normal
+
+        if (pauseMenuPanel != null) pauseMenuPanel.SetActive(false);
+        if (darkOverlayPanel != null) darkOverlayPanel.SetActive(false);
+    }
+
+    /// <summary>
+    /// Kembali ke Main Menu, dipanggil oleh tombol UI.
+    /// </summary>
+    public void BackToMainMenu()
+    {
+        // Pastikan Time.timeScale kembali normal sebelum pindah scene
+        Time.timeScale = 1f;
+        isPaused = false;
+
+        // Hentikan BGM game sebelum kembali ke menu
+        if (AudioManaging.Instance != null)
+        {
+            AudioManaging.Instance.StopBGM();
+        }
+
+        // Gunakan SceneManager untuk memuat MainMenu
+        // Pastikan Anda sudah menambahkan 'using UnityEngine.SceneManagement;' di bagian atas file
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+    }
+} // <--- Ini adalah kurung kurawal penutup Class, pastikan fungsi baru ada DI ATASNYA
