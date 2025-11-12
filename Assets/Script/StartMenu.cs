@@ -39,6 +39,7 @@ public class StartMenu : MonoBehaviour
 
     public void QuitGame()
     {
+        if (AudioManaging.Instance != null) AudioManaging.Instance.PlaySFX("button_push");
         Debug.Log("QUIT!");
         Application.Quit();
     }

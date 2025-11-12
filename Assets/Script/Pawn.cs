@@ -226,6 +226,7 @@ public class Pawn : MonoBehaviour
         {
             papan.giliranPlayer = 0;
         }
+        papan.UpdateGiliranText(); // Memberitahu board untuk update teks UI
     }
 
     /// <summary>

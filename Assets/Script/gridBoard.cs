@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class gridBoard : MonoBehaviour
 {
@@ -57,6 +58,10 @@ public class gridBoard : MonoBehaviour
     [Header("Game End")]
     public GameEndUI gameEndUI;
 
+    [Header("UI Giliran")]
+    [Tooltip("Teks untuk menampilkan giliran siapa")]
+    public TextMeshProUGUI giliranText;
+
     public bool SedangGerak;
     public int giliranPlayer;
     public bool gameEnded = false;
@@ -91,6 +96,7 @@ public class gridBoard : MonoBehaviour
         {
             AudioManaging.Instance.PlayBGM("game_scene_theme");
         }
+        UpdateGiliranText();
     }
 
     void Update()
@@ -377,6 +383,7 @@ public class gridBoard : MonoBehaviour
         if (gameEnded) return; // Prevent multiple calls
         
         gameEnded = true;
+        UpdateGiliranText();
         SedangGerak = true; // Lock the game
         
         // Determine which player won (1-based for display)
@@ -425,6 +432,8 @@ public class gridBoard : MonoBehaviour
     /// </summary>
     public void ResumeGame()
     {
+        if (AudioManaging.Instance != null) AudioManaging.Instance.PlaySFX("button_push");
+
         isPaused = false;
         Time.timeScale = 1f; // Mengembalikan waktu ke normal
 
@@ -437,6 +446,8 @@ public class gridBoard : MonoBehaviour
     /// </summary>
     public void BackToMainMenu()
     {
+        if (AudioManaging.Instance != null) AudioManaging.Instance.PlaySFX("button_push");
+
         // Pastikan Time.timeScale kembali normal sebelum pindah scene
         Time.timeScale = 1f;
         isPaused = false;
@@ -450,5 +461,26 @@ public class gridBoard : MonoBehaviour
         // Gunakan SceneManager untuk memuat MainMenu
         // Pastikan Anda sudah menambahkan 'using UnityEngine.SceneManagement;' di bagian atas file
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+    }
+    /// <summary>
+    /// Memperbarui teks UI untuk menunjukkan giliran pemain.
+    /// </summary>
+    public void UpdateGiliranText()
+    {
+        if (giliranText == null) return; // Jangan lakukan apa-apa jika teks tidak di-assign
+
+        if (gameEnded)
+        {
+            // Sembunyikan teks giliran jika game sudah berakhir
+            giliranText.text = "";
+        }
+        else if (giliranPlayer == 0)
+        {
+            giliranText.text = "Player 1 Turns";
+        }
+        else
+        {
+            giliranText.text = "Player 2 Turns";
+        }
     }
 } 

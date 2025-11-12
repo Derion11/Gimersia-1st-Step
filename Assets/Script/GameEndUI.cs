@@ -130,6 +130,7 @@ public class GameEndUI : MonoBehaviour
     /// </summary>
     public void RestartGame()
     {
+        if (AudioManaging.Instance != null) AudioManaging.Instance.PlaySFX("button_push");
         // Reload the current scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
@@ -139,6 +140,9 @@ public class GameEndUI : MonoBehaviour
     /// </summary>
     public void LoadMainMenu()
     {
+        if (AudioManaging.Instance != null) AudioManaging.Instance.PlaySFX("button_push");
+        // Hentikan BGM game sebelum kembali ke menu
+        if (AudioManaging.Instance != null)
         // Load the MainMenu scene
         // Make sure your MainMenu scene is added to Build Settings!
         SceneManager.LoadScene("MainMenu");

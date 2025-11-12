@@ -70,6 +70,8 @@ public class RandomCardUI : MonoBehaviour
     /// </summary>
     public void OnAccept()
     {
+        if (AudioManaging.Instance != null) AudioManaging.Instance.PlaySFX("button_push");
+        
         if (currentCard == null || currentPawn == null || cardManager == null) return;
 
         Debug.Log("Player accepted card effect");
@@ -91,7 +93,7 @@ public class RandomCardUI : MonoBehaviour
     public void OnCancel()
     {
         Debug.Log("Player cancelled card effect");
-
+        if (AudioManaging.Instance != null) AudioManaging.Instance.PlaySFX("button_push");
         // Hide UI
         HideCard();
 
