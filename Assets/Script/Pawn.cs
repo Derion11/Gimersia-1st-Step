@@ -67,7 +67,7 @@ public class Pawn : MonoBehaviour
     /// </summary>
     public void LemparDaduDanJalan()
     {
-        if (papan == null || papan.SedangGerak) return;
+        if (papan == null || papan.SedangGerak || papan.gameEnded) return;
 
         // Generate random dice value
         int langkah = Random.Range(1, 7);
@@ -104,7 +104,7 @@ public class Pawn : MonoBehaviour
     /// </summary>
     public void JalanBeberapaLangkah(int jumlahLangkah, bool fromCard = false)
     {
-        if (papan == null || papan.SedangGerak || jumlahLangkah == 0) return;
+        if (papan == null || papan.SedangGerak || papan.gameEnded || jumlahLangkah == 0) return;
 
         int targetIndex = nomorSaatIni + jumlahLangkah;
         
@@ -206,6 +206,14 @@ public class Pawn : MonoBehaviour
                 papan.cardManager.OnCardActivated(this, card);
                 yield break;  // Stop here, UI will handle the rest
             }
+        }
+
+        // === CHECK WIN CONDITION ===
+        if (nomorSaatIni >= papan.LastIndex && !papan.gameEnded)
+        {
+            // Player reached the last square - they win!
+            papan.EndGame(this);
+            yield break; // Stop here, game is over
         }
 
         papan.SedangGerak = false;

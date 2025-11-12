@@ -42,8 +42,12 @@ public class gridBoard : MonoBehaviour
     [Header("Dice Animation")]
     public DiceAnimator diceAnimator;
 
+    [Header("Game End")]
+    public GameEndUI gameEndUI;
+
     public bool SedangGerak;
     public int giliranPlayer;
+    public bool gameEnded = false;
     public int LastIndex => posisiKotak.Count - 1;
 
     void Start()
@@ -322,6 +326,47 @@ public class gridBoard : MonoBehaviour
             lr.SetPosition(0, a);
             lr.SetPosition(1, b);
             _garisUlar.Add(lr);
+        }
+    }
+
+    /// <summary>
+    /// Ends the game and shows the winner UI
+    /// </summary>
+    /// <param name="winningPawn">The pawn that won the game</param>
+    public void EndGame(Pawn winningPawn)
+    {
+        if (gameEnded) return; // Prevent multiple calls
+        
+        gameEnded = true;
+        SedangGerak = true; // Lock the game
+        
+        // Determine which player won (1-based for display)
+        int winnerNumber = 0;
+        Sprite winnerSprite = null;
+        
+        if (winningPawn == player01)
+        {
+            winnerNumber = 1;
+            var sr = player01.GetComponent<SpriteRenderer>();
+            if (sr != null) winnerSprite = sr.sprite;
+        }
+        else if (winningPawn == player02)
+        {
+            winnerNumber = 2;
+            var sr = player02.GetComponent<SpriteRenderer>();
+            if (sr != null) winnerSprite = sr.sprite;
+        }
+        
+        Debug.Log($"Game Over! Player {winnerNumber} wins!");
+        
+        // Show the end game UI
+        if (gameEndUI != null)
+        {
+            gameEndUI.ShowWinner(winnerNumber, winnerSprite);
+        }
+        else
+        {
+            Debug.LogWarning("GameEndUI is not assigned in gridBoard!");
         }
     }
 }
