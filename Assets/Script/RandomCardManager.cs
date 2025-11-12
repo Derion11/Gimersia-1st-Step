@@ -145,6 +145,11 @@ public class RandomCardManager : MonoBehaviour
     {
         if (cardUI == null) return;
 
+        if (board != null && board.giliranText != null)
+        {
+            board.giliranText.gameObject.SetActive(false); // Sembunyikan teks giliran
+        }
+
         // Show the UI and let the player decide
         cardUI.ShowCard(pawn, card, this);
     }
@@ -167,6 +172,11 @@ public class RandomCardManager : MonoBehaviour
         if (board != null)
         {
             board.SedangGerak = false;
+            // Tampilkan lagi teks giliran. Skrip Pawn akan mengupdatenya setelah selesai bergerak.
+            if (board.giliranText != null)
+            {
+                board.giliranText.gameObject.SetActive(true);
+            }
         }
 
         // Move the pawn (fromCard=true prevents checking for another card)
@@ -219,6 +229,13 @@ public class RandomCardManager : MonoBehaviour
                 board.giliranPlayer = 1;
             else
                 board.giliranPlayer = 0;
+
+            // Tampilkan dan update teks giliran SETELAH giliran diganti
+            if (board.giliranText != null)
+            {
+                board.giliranText.gameObject.SetActive(true);
+                board.UpdateGiliranText(); // Memanggil fungsi update dari gridBoard
+            }
         }
     }
 }
