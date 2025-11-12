@@ -26,17 +26,34 @@ public class DiceAnimator : MonoBehaviour
     [Tooltip("How fast dice faces flash (seconds between changes)")]
     public float flashSpeed = 0.05f;
     
+    [Tooltip("How long to display final result (seconds)")]
+    public float resultDisplayDuration = 0.5f;
+    
     [Tooltip("Play sound effect during animation")]
     public bool playSoundEffect = true;
 
-    [Header("Optional: Scale Animation")]
+    [Header("Visual Effects")]
     [Tooltip("Enable dice to grow/shrink during animation")]
     public bool useScaleAnimation = true;
     
     [Tooltip("Scale multiplier during animation")]
     public float scaleMultiplier = 1.2f;
+    
+    [Tooltip("Enable rotation during roll")]
+    public bool useRotation = true;
+    
+    [Tooltip("Rotation speed (degrees per second)")]
+    public float rotationSpeed = 720f;
+    
+    [Tooltip("Enable glow/pulse effect on final result")]
+    public bool useGlowEffect = true;
+    
+    [Tooltip("Shake intensity during roll")]
+    public float shakeIntensity = 0.1f;
 
     private Vector3 originalScale;
+    private Vector3 originalPosition;
+    private Quaternion originalRotation;
     private bool isAnimating = false;
 
     void Start()
@@ -54,6 +71,8 @@ public class DiceAnimator : MonoBehaviour
 
         // Store original scale
         originalScale = transform.localScale;
+        originalPosition = transform.localPosition;
+        originalRotation = transform.localRotation;
 
         // Don't hide - keep GameObject active but make it invisible
         SetVisibility(false);
@@ -119,18 +138,38 @@ public class DiceAnimator : MonoBehaviour
 
         Debug.Log($"DiceAnimator: Starting flash phase for {animationDuration} seconds");
 
-        // Phase 1: Rapid random flashing
+        // Phase 1: Rapid random flashing with effects
         while (elapsed < animationDuration)
         {
             // Show random dice face
             int randomFace = Random.Range(0, 6);
             SetDiceFace(randomFace);
 
-            // Optional: Scale animation (pulse effect)
+            float t = elapsed / animationDuration;
+
+            // Scale animation (pulse effect)
             if (useScaleAnimation)
             {
-                float t = Mathf.PingPong(elapsed / animationDuration * 2f, 1f);
-                transform.localScale = Vector3.Lerp(originalScale, targetScale, t);
+                float pulseT = Mathf.PingPong(elapsed / animationDuration * 2f, 1f);
+                transform.localScale = Vector3.Lerp(originalScale, targetScale, pulseT);
+            }
+
+            // Rotation effect (spinning dice)
+            if (useRotation)
+            {
+                float angle = rotationSpeed * Time.deltaTime;
+                transform.Rotate(0, 0, angle);
+            }
+
+            // Shake effect (screen shake feel)
+            if (shakeIntensity > 0)
+            {
+                Vector3 shake = new Vector3(
+                    Random.Range(-shakeIntensity, shakeIntensity),
+                    Random.Range(-shakeIntensity, shakeIntensity),
+                    0
+                );
+                transform.localPosition = originalPosition + shake;
             }
 
             // Wait before next flash
@@ -138,17 +177,49 @@ public class DiceAnimator : MonoBehaviour
             elapsed += flashSpeed;
         }
 
+        // Reset position and rotation
+        transform.localPosition = originalPosition;
+        transform.localRotation = originalRotation;
+
         // Phase 2: Show final result
         SetDiceFace(finalValue - 1); // Convert 1-6 to 0-5 index
 
-        // Reset scale
+        // Dramatic scale-in animation for result
         if (useScaleAnimation)
         {
+            // Shrink then grow (bounce effect)
             float t = 0f;
+            float bounceTime = 0.3f;
+            
+            while (t < bounceTime)
+            {
+                t += Time.deltaTime;
+                float progress = t / bounceTime;
+                
+                // Bounce curve: shrink -> overshoot -> settle
+                float bounceScale = 1f;
+                if (progress < 0.5f)
+                {
+                    // Shrink phase
+                    bounceScale = Mathf.Lerp(scaleMultiplier, 0.8f, progress * 2f);
+                }
+                else
+                {
+                    // Grow and overshoot phase
+                    float bounceProgress = (progress - 0.5f) * 2f;
+                    bounceScale = Mathf.Lerp(0.8f, 1.2f, bounceProgress);
+                }
+                
+                transform.localScale = originalScale * bounceScale;
+                yield return null;
+            }
+            
+            // Settle to normal size
+            t = 0f;
             while (t < 0.2f)
             {
                 t += Time.deltaTime;
-                transform.localScale = Vector3.Lerp(targetScale, originalScale, t / 0.2f);
+                transform.localScale = Vector3.Lerp(originalScale * 1.2f, originalScale, t / 0.2f);
                 yield return null;
             }
             transform.localScale = originalScale;
@@ -160,8 +231,32 @@ public class DiceAnimator : MonoBehaviour
             AudioManaging.Instance.PlaySFX("dice_result");
         }
 
-        // Brief pause to show result
-        yield return new WaitForSeconds(0.5f);
+        // Phase 3: Glow/pulse effect on final result
+        if (useGlowEffect)
+        {
+            float glowTime = 0f;
+            float glowDuration = resultDisplayDuration * 0.7f; // Glow during most of display time
+            
+            while (glowTime < glowDuration)
+            {
+                glowTime += Time.deltaTime;
+                
+                // Pulse scale slightly (breathing effect)
+                float pulseT = Mathf.Sin(glowTime * 5f) * 0.05f + 1f;
+                transform.localScale = originalScale * pulseT;
+                
+                // Optional: Color pulse (if you want color change)
+                // Note: This won't work without additional setup, but adding for future
+                
+                yield return null;
+            }
+            
+            // Reset scale
+            transform.localScale = originalScale;
+        }
+
+        // Display final result for readable duration
+        yield return new WaitForSeconds(resultDisplayDuration - (useGlowEffect ? resultDisplayDuration * 0.7f : 0f));
 
         Debug.Log("DiceAnimator: Animation complete! Calling callback...");
         isAnimating = false;

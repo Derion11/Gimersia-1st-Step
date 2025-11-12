@@ -996,9 +996,14 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   animationDuration: 1
   flashSpeed: 0.05
+  resultDisplayDuration: 0.5
   playSoundEffect: 0
   useScaleAnimation: 1
   scaleMultiplier: 1.5
+  useRotation: 1
+  rotationSpeed: 720
+  useGlowEffect: 1
+  shakeIntensity: 0.1
 --- !u!114 &1146841205
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1438,14 +1443,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6926c58d57d173046a01445fd2bbc9f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numberOfCards: 30
+  numberOfCards: 50
   minSteps: 1
   maxSteps: 10
   cardVisualPrefab: {fileID: 53569946777429180, guid: e50b54f52c1dc1441acc1245608cda50, type: 3}
   board: {fileID: 586557224}
   cardUI: {fileID: 1559046877}
-  forwardColor: {r: 0, g: 1, b: 0, a: 1}
-  backwardColor: {r: 1, g: 0, b: 0, a: 1}
+  cardColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!4 &1559046879
 Transform:
   m_ObjectHideFlags: 0

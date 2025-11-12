@@ -24,9 +24,9 @@ public class RandomCardManager : MonoBehaviour
     public gridBoard board;
     public RandomCardUI cardUI;
 
-    [Header("Colors (optional)")]
-    public Color forwardColor = Color.green;
-    public Color backwardColor = Color.red;
+    [Header("Card Appearance (Unified)")]
+    [Tooltip("Color for all mystery cards (since effect is hidden)")]
+    public Color cardColor = Color.yellow;
 
     // Internal tracking
     private List<RandomCard> activeCards = new List<RandomCard>();
@@ -88,19 +88,19 @@ public class RandomCardManager : MonoBehaviour
             int gridPos = availablePositions[randomIndex];
             availablePositions.RemoveAt(randomIndex); // Prevent duplicates
 
-            // Random card type
-            RandomCard.CardType type = Random.value > 0.5f
+            // Random card type (50/50 chance)
+            RandomCard.CardType type = Random.value >= 0.5f
                 ? RandomCard.CardType.MoveForward
                 : RandomCard.CardType.MoveBackward;
 
             // Random steps
             int steps = Random.Range(minSteps, maxSteps + 1);
 
-            // Create card
+            // Create card (effect is hidden until activated!)
             RandomCard card = new RandomCard(type, steps, gridPos);
             activeCards.Add(card);
 
-            // Spawn visual indicator
+            // Spawn visual indicator (all cards look the same - mystery!)
             if (cardVisualPrefab != null)
             {
                 Vector3 position = board.GetPosisiKotak(gridPos);
@@ -109,18 +109,18 @@ public class RandomCardManager : MonoBehaviour
                 // Scale down to fit the grid square
                 visual.transform.localScale = Vector3.one * (board.ukuranKotak * 0.6f); // 60% of grid size
                 
-                // Optional: Color-code the visual
+                // All cards use the same color (mystery effect)
                 SpriteRenderer sr = visual.GetComponent<SpriteRenderer>();
                 if (sr != null)
                 {
-                    sr.color = type == RandomCard.CardType.MoveForward ? forwardColor : backwardColor;
+                    sr.color = cardColor; // Same color for all cards
                     sr.sortingOrder = 50; // Above tiles, below pawns
                 }
 
                 cardVisuals[gridPos] = visual;
             }
 
-            Debug.Log($"Spawned {type} card at position {gridPos}: {steps} steps");
+            Debug.Log($"Spawned mystery card at position {gridPos}: {type} {steps} steps (hidden)");
         }
     }
 
