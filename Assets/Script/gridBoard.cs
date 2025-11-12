@@ -211,7 +211,7 @@ public class gridBoard : MonoBehaviour
         newUlar = new Vector2Int(85, 67);
         daftarUlar.Add(newUlar);
 
-        newUlar = new Vector2Int(99, 75);
+        newUlar = new Vector2Int(98, 75);
         daftarUlar.Add(newUlar);
 
     }
